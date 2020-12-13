@@ -7,6 +7,12 @@
 .idea
 *.iml
 
+# vs code
+.metals
+.vscode
+.bloop
+project/
+
 # Eclipse
 .worksheet
 .settings
