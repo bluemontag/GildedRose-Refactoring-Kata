@@ -13,18 +13,22 @@ class GildedRose(val items: Array[Item]) {
   def updateItemQuality(item: Item) {
     if (isAgedBrieItem(item) || isBackstagePassesItem(item)) {
       // is special item
-      if (item.quality < 50) {
-        item.quality = item.quality + 1
-
-        if (isBackstagePassesItem(item)) {
-          if (item.sellIn < 11 && item.quality < 50) {
-              item.quality = item.quality + 1
-          }
-          if (item.sellIn < 6 && item.quality < 50) {
-              item.quality = item.quality + 1
-          }
+      item.quality = item.quality + 1
+      if (isBackstagePassesItem(item)) {
+        val days = item.sellIn
+        if (days <= 10) {
+          // 10 days before the concert
+          item.quality = item.quality + 1
         }
-      }      
+        if (days <= 5) {
+          // 5 days before the concert
+          item.quality = item.quality + 1
+        }
+      }
+      // if it is more than 50, return to 50
+      if (item.quality > 50) {
+        item.quality = 50
+      }
     } else {
       // is standard item here
       if (item.quality > 0 && !isSulfurasItem(item)) {
