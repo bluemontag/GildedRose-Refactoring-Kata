@@ -11,30 +11,12 @@ class GildedRose(val items: Array[Item]) {
   }
 
   def updateItemQuality(item: Item) {
-    if (isAgedBrieItem(item) || isBackstagePassesItem(item)) {
-      // is special item
-      item.quality = item.quality + 1
-      if (isBackstagePassesItem(item)) {
-        val days = item.sellIn
-        if (days <= 10) {
-          // 10 days before the concert
-          item.quality = item.quality + 1
-        }
-        if (days <= 5) {
-          // 5 days before the concert
-          item.quality = item.quality + 1
-        }
-      }
-      // if it is more than 50, return to 50
-      if (item.quality > 50) {
-        item.quality = 50
-      }
+    if (isIncreaseValueWithTime(item)) {
+      // special item, increases value with time
+      updateQualityForSpecialItem(item)
     } else {
-      // is standard item here
-      if (item.quality > 0 && !isSulfurasItem(item)) {
-          // is not sulfuras
-          item.quality = item.quality - 1
-      }
+      // standard item, decrease quality with time
+      updateQualityForStandardItem(item)
     }
 
     // update the sell by date, but not for sulfuras (never to be sold)
@@ -42,28 +24,12 @@ class GildedRose(val items: Array[Item]) {
       item.sellIn = item.sellIn - 1
     }
 
-    // update quality for sold items
+    // if item is already to be sold
     if (item.sellIn < 0) {
-      if (isAgedBrieItem(item)) {
-        // it is aged brie
-        if (item.quality < 50) {
-          item.quality = item.quality + 1
-        }
-      } else {
-        // if it is a concert ticket
-        if (isBackstagePassesItem(item)) {
-          // ticket no longer valid, quality is zero
-          item.quality = 0
-        } else {
-          // is not a concert pass ticket
-          // for any other items except sulfuras
-          if (item.quality > 0 && !isSulfurasItem(item)) {
-              // quality degrades by 1
-              item.quality = item.quality - 1
-          }
-        }
-      }
+      // update quality for due time items
+      updateQualityForDueItem(item)
     }
+    ensureQualityIsNotMoreThan50(item)
   }
 
   def isAgedBrieItem(item: Item): Boolean = {
@@ -76,5 +42,60 @@ class GildedRose(val items: Array[Item]) {
 
   def isSulfurasItem(item: Item): Boolean = {
     item.name.equals("Sulfuras, Hand of Ragnaros")
+  }
+
+  def isIncreaseValueWithTime(item: Item): Boolean = {
+    this.isAgedBrieItem(item) || this.isBackstagePassesItem(item)
+  }
+
+  def updateQualityForSpecialItem(item: Item): Unit = {
+    // is special item
+    item.quality = item.quality + 1
+    if (isBackstagePassesItem(item)) {
+      val days = item.sellIn
+      if (days <= 10) {
+        // 10 days before the concert: add one more point
+        item.quality = item.quality + 1
+      }
+      if (days <= 5) {
+        // 5 days before the concert: add one more extra point
+        item.quality = item.quality + 1
+      }
+    }
+  }
+
+  def updateQualityForStandardItem(item: Item): Unit = {
+    // is standard item here, decrease quality
+    if (item.quality > 0 && !isSulfurasItem(item)) {
+        // is not sulfuras
+        item.quality = item.quality - 1
+    }
+  }
+
+  def updateQualityForDueItem(item: Item): Unit = {
+    if (isAgedBrieItem(item)) {
+      // it is aged brie
+      item.quality = item.quality + 1
+    } else {
+      // if it is a concert ticket
+      if (isBackstagePassesItem(item)) {
+        // ticket no longer valid, quality is zero
+        item.quality = 0
+      } else {
+        // is not a concert pass ticket
+        // for any other items except sulfuras
+        if (item.quality > 0 && !isSulfurasItem(item)) {
+            // quality degrades by 1
+            item.quality = item.quality - 1
+        }
+      }
+    }
+  }
+
+  def ensureQualityIsNotMoreThan50(item: Item): Unit = {
+    // if it is more than 50, return to 50 again
+    if (item.quality > 50 && !isSulfurasItem(item)) {
+      item.quality = 50
+    }
   }
 }
