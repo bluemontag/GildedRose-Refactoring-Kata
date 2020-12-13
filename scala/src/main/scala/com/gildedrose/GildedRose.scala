@@ -17,6 +17,7 @@ class GildedRose(val items: Array[Item]) {
     } else {
       // standard item, decrease quality with time
       updateQualityForStandardItem(item)
+      updateQualityForConjuredItem(item)
     }
 
     // update the sell by date, but not for sulfuras (never to be sold)
@@ -44,6 +45,9 @@ class GildedRose(val items: Array[Item]) {
     item.name.equals("Sulfuras, Hand of Ragnaros")
   }
 
+  def isConjuredItem(item: Item): Boolean = {
+    item.name.startsWith("Conjured")
+  }
   def isIncreaseValueWithTime(item: Item): Boolean = {
     this.isAgedBrieItem(item) || this.isBackstagePassesItem(item)
   }
@@ -66,9 +70,17 @@ class GildedRose(val items: Array[Item]) {
 
   def updateQualityForStandardItem(item: Item): Unit = {
     // is standard item here, decrease quality
-    if (item.quality > 0 && !isSulfurasItem(item)) {
-        // is not sulfuras
-        item.quality = item.quality - 1
+    if (item.quality > 0 &&
+       !isSulfurasItem(item) &&
+       !isConjuredItem(item)) {
+      // is not sulfuras
+      item.quality = item.quality - 1
+    }
+  }
+
+  def updateQualityForConjuredItem(item: Item): Unit = {
+    if (item.quality > 0 && isConjuredItem(item)) {
+      item.quality = item.quality - 2
     }
   }
 

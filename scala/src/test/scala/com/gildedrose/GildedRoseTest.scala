@@ -56,7 +56,7 @@ class GildedRoseTest extends AnyFlatSpec with Matchers {
       }
     }
 
-    "All items" should "have not a quality value greater than 50 (except for Sulfuras)" in {
+    "All items" should "have not a quality value lower than 50 (except for Sulfuras)" in {
       this.simulate50Days(dontFilterItems, this.qualityIsLessThan50ExceptForSulfuras)
     }
 
@@ -129,4 +129,20 @@ class GildedRoseTest extends AnyFlatSpec with Matchers {
       this.simulate50Days(itemBeginsWithElixir, this.itemDegradesTwiceAsFastWhenSold)
     }
 
+    "Conjured items" should "degrade quality twice as fast when sell date has passed" in {
+      val itemBeginsWithConjured = Option("Conjured")
+      this.simulate50Days(itemBeginsWithConjured, this.itemDegradesTwiceAsFastThanNormal)
+    }
+
+    def itemDegradesTwiceAsFastThanNormal(item: Item, lastQuality: Int): Assertion = {
+
+      val expectedQuality = lastQuality - 2
+
+      if (expectedQuality >= 0) {
+        item.quality should equal (expectedQuality)
+      } else {
+        // item reached 0 quality
+        item.quality should equal (0)
+      }
+    }
 }
